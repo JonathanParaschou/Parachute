@@ -4,6 +4,7 @@ package services
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
@@ -37,6 +38,7 @@ func (s *StorageMetadata) GetMetadata() (StorageMetadata, error) {
 	root := defaultWindowsPath() // e.g. "C:\\"
 	total, free, avail, platform, err := diskUsageBytes(root)
 	if err != nil {
+		log.Printf("[storage] diskUsageBytes(%q) failed: %v", root, err)
 		return *s, fmt.Errorf("storage metadata error: %v", err)
 	}
 
@@ -46,20 +48,44 @@ func (s *StorageMetadata) GetMetadata() (StorageMetadata, error) {
 	s.UsedStorage = used
 	s.FreeStorage = free
 	s.AvailableStorage = avail
-	s.Drives, _ = s.GetDrives()
+
+	// Always prefer returning [] not null in JSON
+	s.Drives = []Drive{}
+
+	drives, derr := s.GetDrives()
+	if derr != nil {
+		log.Printf("[storage] GetDrives failed: %v", derr)
+		// keep s.Drives as empty slice
+	} else {
+		if drives == nil {
+			// keep empty slice
+			log.Printf("[storage] GetDrives returned nil slice; coercing to empty")
+		} else {
+			s.Drives = drives
+		}
+	}
+
+	log.Printf("[storage] metadata ok: root=%s total=%d used=%d free=%d avail=%d drives=%d",
+		root, total, used, free, avail, len(s.Drives))
 
 	return *s, nil
 }
 
 func (s *StorageMetadata) GetDrives() ([]Drive, error) {
-	// Prefer modern Storage provider (best for SSD/HDD + bus)
 	storage, storageErr := queryMSFTPhysicalDisks()
-	// Fallback / enrichment
 	win32, win32Err := queryWin32DiskDrives()
+
+	log.Printf("[storage] WMI results: MSFT_PhysicalDisk len=%d err=%v | Win32_DiskDrive len=%d err=%v",
+		len(storage), storageErr, len(win32), win32Err)
 
 	// If both fail, return an error
 	if storageErr != nil && win32Err != nil {
 		return nil, fmt.Errorf("WMI failed: MSFT_PhysicalDisk=%v; Win32_DiskDrive=%v", storageErr, win32Err)
+	}
+
+	// If both succeeded but both are empty, treat as an error (otherwise it silently returns [])
+	if storageErr == nil && win32Err == nil && len(storage) == 0 && len(win32) == 0 {
+		return []Drive{}, fmt.Errorf("WMI returned zero disks (storage=0 win32=0). WMI may be disabled/blocked or running under restricted permissions")
 	}
 
 	// Index Win32 by index
@@ -93,7 +119,6 @@ func (s *StorageMetadata) GetDrives() ([]Drive, error) {
 
 			name := strings.TrimSpace(w.DeviceID)
 			if name == "" {
-				// typical format: \\.\PHYSICALDRIVE0
 				name = fmt.Sprintf(`\\.\PHYSICALDRIVE%d`, pd.DeviceId)
 			}
 
@@ -107,6 +132,7 @@ func (s *StorageMetadata) GetDrives() ([]Drive, error) {
 			})
 		}
 
+		log.Printf("[storage] drives from MSFT_PhysicalDisk: %d", len(out))
 		s.Drives = out
 		return out, nil
 	}
@@ -125,6 +151,7 @@ func (s *StorageMetadata) GetDrives() ([]Drive, error) {
 		})
 	}
 
+	log.Printf("[storage] drives from Win32_DiskDrive fallback: %d", len(out))
 	s.Drives = out
 	return out, nil
 }
@@ -135,10 +162,6 @@ func diskUsageBytes(path string) (total, free, avail uint64, platform string, er
 		return 0, 0, 0, "windows", err
 	}
 
-	// GetDiskFreeSpaceEx returns:
-	// avail = free bytes available to the caller
-	// total = total bytes
-	// free  = total free bytes on the disk
 	if err = windows.GetDiskFreeSpaceEx(p, &avail, &total, &free); err != nil {
 		return 0, 0, 0, "windows", err
 	}
@@ -147,7 +170,6 @@ func diskUsageBytes(path string) (total, free, avail uint64, platform string, er
 }
 
 func defaultWindowsPath() string {
-	// Prefer SYSTEMDRIVE if set (usually "C:")
 	if d := strings.TrimSpace(os.Getenv("SYSTEMDRIVE")); d != "" {
 		if !strings.HasSuffix(d, `\`) {
 			d += `\`
@@ -171,16 +193,15 @@ type msftPhysicalDisk struct {
 type win32DiskDrive struct {
 	Index         uint32
 	Model         string
-	SerialNumber  string // may be empty on some systems
-	Size          string // bytes as string
-	DeviceID      string // \\.\PHYSICALDRIVE0
-	InterfaceType string // "SCSI", "IDE", "USB" (rough)
+	SerialNumber  string
+	Size          string
+	DeviceID      string
+	InterfaceType string
 }
 
 func queryMSFTPhysicalDisks() ([]msftPhysicalDisk, error) {
 	var dst []msftPhysicalDisk
-	q := wmi.CreateQuery(&dst, "")
-	// Storage namespace
+	q := "SELECT DeviceId, FriendlyName, SerialNumber, Size, BusType, MediaType FROM MSFT_PhysicalDisk"
 	if err := wmi.QueryNamespace(q, &dst, `ROOT\Microsoft\Windows\Storage`); err != nil {
 		return nil, err
 	}
@@ -189,15 +210,13 @@ func queryMSFTPhysicalDisks() ([]msftPhysicalDisk, error) {
 
 func queryWin32DiskDrives() ([]win32DiskDrive, error) {
 	var dst []win32DiskDrive
-	q := wmi.CreateQuery(&dst, "")
-	if err := wmi.Query(q, &dst); err != nil {
+	q := "SELECT Index, Model, SerialNumber, Size, DeviceID, InterfaceType FROM Win32_DiskDrive"
+	if err := wmi.QueryNamespace(q, &dst, `ROOT\CIMV2`); err != nil {
 		return nil, err
 	}
 	return dst, nil
 }
 
-// MSFT_PhysicalDisk MediaType (common values):
-// 0 = Unspecified, 3 = HDD, 4 = SSD, 5 = SCM
 func mediaTypeToIsSSD(mediaType uint16) *bool {
 	switch mediaType {
 	case 4, 5:
@@ -211,7 +230,6 @@ func mediaTypeToIsSSD(mediaType uint16) *bool {
 	}
 }
 
-// BusType mapping best-effort; fallback to Win32 InterfaceType when unknown.
 func busTypeString(bus uint16, fallback string) string {
 	switch bus {
 	case 1:
