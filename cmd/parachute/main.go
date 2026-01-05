@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/JonathanParaschou/parachute/internal/app"
+	"parachute/internal/app"
 )
 
 func main() {

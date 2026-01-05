@@ -1,9 +1,21 @@
 package app
 
 import (
-	"github.com/JonathanParaschou/parachute/internal/server"
+	"net/http"
+
+	"parachute/internal/handlers"
+	"parachute/internal/server"
 )
 
-func Run() {
-	server.StartServer()
+func Run() error {
+	router := http.NewServeMux()
+
+	// routes
+	router.HandleFunc("/heartbeat", handlers.Heartbeat)
+	router.HandleFunc("/storage-metadata", handlers.StorageMetadata)
+
+	// server instantiation
+	srv := server.New(router)
+
+	return srv.Start()
 }
