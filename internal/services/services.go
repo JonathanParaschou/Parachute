@@ -1,8 +1,8 @@
 package services
 
 type Services struct {
-	Heartbeat       *HeartbeatService
-	StorageMetadata *StorageMetadataService
+	Heartbeat          *HeartbeatService
+	StorageMetadata, _ *StorageMetadata
 }
 
 func NewServices() *Services {

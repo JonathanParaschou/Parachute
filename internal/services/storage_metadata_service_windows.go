@@ -20,23 +20,24 @@ type Drive struct {
 	IsSSD     *bool
 }
 
-type StorageMetadataService struct {
-	Platform     string
-	TotalStorage uint64
-	UsedStorage  uint64
-	FreeStorage  uint64
-	Drives       []Drive
+type StorageMetadata struct {
+	Platform         string
+	TotalStorage     uint64
+	UsedStorage      uint64
+	FreeStorage      uint64
+	AvailableStorage uint64
+	Drives           []Drive
 }
 
-func NewStorageMetadataService() *StorageMetadataService {
-	return &StorageMetadataService{}
+func NewStorageMetadataService() *StorageMetadata {
+	return &StorageMetadata{}
 }
 
-func (s *StorageMetadataService) GetMetadata() string {
+func (s *StorageMetadata) GetMetadata() (StorageMetadata, error) {
 	root := defaultWindowsPath() // e.g. "C:\\"
 	total, free, avail, platform, err := diskUsageBytes(root)
 	if err != nil {
-		return fmt.Sprintf("Storage metadata error: %v", err)
+		return *s, fmt.Errorf("storage metadata error: %v", err)
 	}
 
 	used := total - free
@@ -44,14 +45,13 @@ func (s *StorageMetadataService) GetMetadata() string {
 	s.TotalStorage = total
 	s.UsedStorage = used
 	s.FreeStorage = free
+	s.AvailableStorage = avail
+	s.Drives, _ = s.GetDrives()
 
-	return fmt.Sprintf(
-		"Storage Metadata OK (%s) [%s]: total=%d used=%d free=%d available=%d",
-		s.Platform, root, total, used, free, avail,
-	)
+	return *s, nil
 }
 
-func (s *StorageMetadataService) GetDrives() ([]Drive, error) {
+func (s *StorageMetadata) GetDrives() ([]Drive, error) {
 	// Prefer modern Storage provider (best for SSD/HDD + bus)
 	storage, storageErr := queryMSFTPhysicalDisks()
 	// Fallback / enrichment
