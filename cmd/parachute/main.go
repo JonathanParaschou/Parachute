@@ -1,9 +1,9 @@
 package main
 
 import (
-	"parachute/internal/app"
+	"parachute/internal/cli"
 )
 
 func main() {
-	app.Run()
+	cli.Main()
 }
