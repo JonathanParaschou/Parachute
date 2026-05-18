@@ -27,6 +27,7 @@ import {
 import { Bar, Doughnut, Line } from "react-chartjs-2";
 import { DashboardData, Drive, StorageRoot, UploadRecord, loadDashboard, uploadFile } from "./api";
 import { formatBytes, formatDate } from "./format";
+import parachuteLogo from "./assets/parachute-logo.svg";
 
 ChartJS.register(
   ArcElement,
@@ -139,14 +140,17 @@ export function App() {
   return (
     <main className="app-shell">
       <header className="topbar">
-        <div>
-          <p className="eyebrow">ParaChute Node</p>
-          <h1>{page === "insights" ? "Node Insights" : "Rig Stats"}</h1>
-          <p className="subtle">
-            {loadState === "ready" && data
-              ? `Node online on ${data.metadata.platform || "this system"}.`
-              : "Checking node status..."}
-          </p>
+        <div className="title-lockup">
+          <img src={parachuteLogo} alt="" />
+          <div>
+            <p className="eyebrow">ParaChute Node</p>
+            <h1>{page === "insights" ? "Node Insights" : "Rig Stats"}</h1>
+            <p className="subtle">
+              {loadState === "ready" && data
+                ? `Node online on ${data.metadata.platform || "this system"}.`
+                : "Checking node status..."}
+            </p>
+          </div>
         </div>
         <div className="toolbar">
           <button className="quiet-button" type="button" onClick={() => void refresh()} aria-label="Refresh dashboard">

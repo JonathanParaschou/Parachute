@@ -1,0 +1,26 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">ParaChute logo</title>
+  <desc id="desc">A blue parachute lowering a teal cloud server.</desc>
+  <g filter="url(#softShadow)">
+    <path d="M238 407C248 292 337 188 479 177C421 235 392 314 399 404C349 381 295 383 238 407Z" fill="#0867E8"/>
+    <path d="M417 407C408 308 448 219 512 176C576 219 616 308 607 407C546 383 478 383 417 407Z" fill="#0867E8"/>
+    <path d="M545 177C687 188 776 292 786 407C729 383 675 381 625 404C632 314 603 235 545 177Z" fill="#0867E8"/>
+
+    <path d="M268 414L418 565" stroke="#052B63" stroke-width="27" stroke-linecap="butt"/>
+    <path d="M415 417L472 523" stroke="#052B63" stroke-width="27" stroke-linecap="butt"/>
+    <path d="M609 417L552 523" stroke="#052B63" stroke-width="27" stroke-linecap="butt"/>
+    <path d="M756 414L606 565" stroke="#052B63" stroke-width="27" stroke-linecap="butt"/>
+
+    <path d="M388 788C337 780 302 739 302 688C302 631 349 585 407 591C425 523 474 496 512 496C550 496 599 523 617 591C675 585 722 631 722 688C722 739 687 780 636 788" stroke="#23CDB6" stroke-width="30" stroke-linecap="butt" stroke-linejoin="round"/>
+
+    <rect x="416" y="674" width="192" height="40" rx="20" fill="#052B63"/>
+    <rect x="416" y="737" width="192" height="40" rx="20" fill="#052B63"/>
+    <circle cx="582" cy="694" r="14" fill="#23CDB6"/>
+    <circle cx="582" cy="757" r="14" fill="#23CDB6"/>
+  </g>
+  <defs>
+    <filter id="softShadow" x="190" y="132" width="644" height="704" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#0F172A" flood-opacity="0.10"/>
+    </filter>
+  </defs>
+</svg>
