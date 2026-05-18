@@ -13,21 +13,21 @@ import (
 )
 
 type Drive struct {
-	Name      string
-	Model     string
-	Serial    string
-	SizeBytes uint64
-	Bus       string
-	IsSSD     *bool
+	Name      string `json:"name"`
+	Model     string `json:"model"`
+	Serial    string `json:"serial"`
+	SizeBytes uint64 `json:"size_bytes"`
+	Bus       string `json:"bus"`
+	IsSSD     *bool  `json:"is_ssd"`
 }
 
 type StorageMetadata struct {
-	Platform         string
-	TotalStorage     uint64
-	UsedStorage      uint64
-	FreeStorage      uint64
-	AvailableStorage uint64
-	Drives           []Drive
+	Platform         string  `json:"platform"`
+	TotalStorage     uint64  `json:"total_storage"`
+	UsedStorage      uint64  `json:"used_storage"`
+	FreeStorage      uint64  `json:"free_storage"`
+	AvailableStorage uint64  `json:"available_storage"`
+	Drives           []Drive `json:"drives"`
 }
 
 func NewStorageMetadataService() *StorageMetadata {

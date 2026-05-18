@@ -1,0 +1,6 @@
+node_modules/
+web/node_modules/
+web/tsconfig.tsbuildinfo
+parachute-server.log
+parachute-server.err.log
+.DS_Store

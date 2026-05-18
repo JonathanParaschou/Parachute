@@ -88,3 +88,19 @@ Start the local server:
 ```bash
 parachute server start
 ```
+
+---
+
+## GitHub Pages
+
+This repository includes a static project page in `docs/`.
+
+To publish it with GitHub Pages:
+
+1. Open the repository settings on GitHub.
+2. Go to **Pages**.
+3. Set **Source** to **Deploy from a branch**.
+4. Select the default branch and the `/docs` folder.
+5. Save.
+
+GitHub will serve the landing page from `docs/index.html`.

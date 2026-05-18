@@ -23,9 +23,11 @@ func Run() error {
 	router.HandleFunc("/storage-metadata", handlers.StorageMetadata)
 	router.HandleFunc("/storage-roots", handlers.StorageRoots)
 	router.HandleFunc("/upload", handlers.Upload)
+	router.HandleFunc("/uploads", handlers.Uploads)
+	router.Handle("/", handlers.Dashboard("web/dist"))
 
 	// server instantiation
-	srv := server.New(router)
+	srv := server.New(server.LoggingMiddleware(router))
 
 	// If VPN is configured, also listen on VPN interface
 	if cfg.VPN != nil {
@@ -33,7 +35,7 @@ func Run() error {
 		vpnAddr := fmt.Sprintf("%s:8080", vpnIP)
 		fmt.Printf("Starting ParaChute server on http://%s (VPN)\n", vpnAddr)
 		go func() {
-			vpnSrv := server.New(router)
+			vpnSrv := server.New(server.LoggingMiddleware(router))
 			vpnSrv.ListenAddr = vpnAddr
 			if err := vpnSrv.Start(); err != nil {
 				fmt.Printf("VPN server failed: %v\n", err)
