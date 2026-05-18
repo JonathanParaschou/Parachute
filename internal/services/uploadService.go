@@ -1,17 +1,16 @@
 package services
 
-import {
-	"encoding/json",
-	"net/http",
-	"parachute/internal/config",
-}
+import "fmt"
 
-type UploadService struct {}
+type UploadService struct{}
 
-func newUploadService() *UploadService {
+func NewUploadService() *UploadService {
 	return &UploadService{}
 }
 
-func (file_data []byte) uploadFile {
-
+func (s *UploadService) ProcessFile(fileData []byte) (int, error) {
+	if len(fileData) == 0 {
+		return 0, fmt.Errorf("uploaded file is empty")
+	}
+	return len(fileData), nil
 }

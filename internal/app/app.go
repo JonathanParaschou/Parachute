@@ -22,6 +22,7 @@ func Run() error {
 	router.HandleFunc("/heartbeat", handlers.Heartbeat)
 	router.HandleFunc("/storage-metadata", handlers.StorageMetadata)
 	router.HandleFunc("/storage-roots", handlers.StorageRoots)
+	router.HandleFunc("/upload", handlers.Upload)
 
 	// server instantiation
 	srv := server.New(router)
