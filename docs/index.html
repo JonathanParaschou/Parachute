@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="ParaChute turns a personal computer into a self-hosted cloud storage node with storage insights, uploads, and optional WireGuard access."
+      content="ParaChute is a CLI-first personal cloud storage node for allocating local storage, persisting uploads, and viewing node insights."
     />
-    <title>ParaChute | Personal Cloud Storage Node</title>
+    <title>ParaChute | CLI-first personal cloud storage</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -17,9 +17,9 @@
         <span>ParaChute</span>
       </a>
       <nav aria-label="Primary navigation">
+        <a href="#commands">Commands</a>
         <a href="#features">Features</a>
         <a href="#dashboard">Dashboard</a>
-        <a href="#quickstart">Quickstart</a>
         <a class="nav-cta" href="https://github.com/">GitHub</a>
       </nav>
     </header>
@@ -27,121 +27,110 @@
     <main id="top">
       <section class="hero">
         <div class="hero-copy">
-          <img class="hero-logo" src="assets/parachute-logo.svg" alt="" />
-          <p class="eyebrow">Self-hosted cloud storage</p>
-          <h1>ParaChute</h1>
+          <p class="eyebrow">Personal storage node</p>
+          <h1>Cloud storage from your own machine.</h1>
           <p class="lede">
-            Turn your own PC into a private storage node with local file persistence,
-            dashboard insights, and optional secure access over WireGuard.
+            ParaChute is a Go CLI that turns a PC into a self-hosted storage node.
+            Allocate local disk, persist uploads, inspect capacity, and open a React
+            dashboard when you want a visual view.
           </p>
           <div class="hero-actions">
-            <a class="primary-button" href="#quickstart">Get Started</a>
-            <a class="secondary-button" href="#dashboard">View Dashboard</a>
+            <a class="primary-button" href="#commands">See Commands</a>
+            <a class="secondary-button" href="#features">Explore Features</a>
           </div>
         </div>
 
-        <div class="product-shot" aria-label="ParaChute dashboard preview">
-          <div class="window-bar">
+        <aside class="command-card" aria-label="ParaChute quickstart commands">
+          <div class="terminal-bar">
             <span></span>
             <span></span>
             <span></span>
           </div>
-          <div class="dashboard-preview">
-            <div class="preview-heading">
-              <div>
-                <small>ParaChute Node</small>
-                <strong>Node Insights</strong>
-              </div>
-              <button>Upload</button>
-            </div>
-            <div class="capacity-card">
-              <small>Allocated Capacity</small>
-              <strong>100 GB</strong>
-              <span>8.1 GB used, 91.9 GB available</span>
-              <div class="meter"><i></i></div>
-            </div>
-            <div class="preview-grid">
-              <article><small>Roots</small><strong>2</strong></article>
-              <article><small>Uploads</small><strong>48</strong></article>
-              <article><small>Utilization</small><strong>8%</strong></article>
-            </div>
-            <div class="chart-row">
-              <div class="donut"></div>
-              <div class="bars">
-                <i></i><i></i><i></i><i></i><i></i><i></i>
-              </div>
-            </div>
-          </div>
+          <pre><code>$ parachute setup
+$ parachute storage add E:\Storage --limit 500GB
+$ parachute server start
+
+Serving dashboard at http://localhost:8080
+Storage root ready: ParachuteStorage</code></pre>
+        </aside>
+      </section>
+
+      <section class="section command-section" id="commands">
+        <div class="section-heading">
+          <p class="eyebrow">CLI surface</p>
+          <h2>Manage the node from the terminal.</h2>
+        </div>
+        <div class="command-grid">
+          <article>
+            <code>parachute setup</code>
+            <p>Initialize config and prepare the node.</p>
+          </article>
+          <article>
+            <code>parachute storage add &lt;path&gt; --limit 500GB</code>
+            <p>Allocate a managed storage root on local disk.</p>
+          </article>
+          <article>
+            <code>parachute storage list</code>
+            <p>View configured roots and capacity limits.</p>
+          </article>
+          <article>
+            <code>parachute server start</code>
+            <p>Run the API and local dashboard.</p>
+          </article>
         </div>
       </section>
 
       <section class="section" id="features">
         <div class="section-heading">
-          <p class="eyebrow">What it does</p>
-          <h2>A lightweight node for storage you control.</h2>
+          <p class="eyebrow">Features</p>
+          <h2>Small core, useful building blocks.</h2>
         </div>
         <div class="feature-grid">
           <article>
             <span>01</span>
-            <h3>Persistent Uploads</h3>
-            <p>Files are written into managed storage roots with object files and JSON metadata sidecars.</p>
+            <h3>Persistent uploads</h3>
+            <p>Files are streamed into object storage and paired with JSON metadata.</p>
           </article>
           <article>
             <span>02</span>
-            <h3>Node Insights</h3>
-            <p>Track allocated capacity, used and free space, root count, upload count, and utilization trends.</p>
+            <h3>Storage roots</h3>
+            <p>Allocate one or more local folders or drives with explicit capacity limits.</p>
           </article>
           <article>
             <span>03</span>
-            <h3>Local First</h3>
-            <p>Run the node on Windows, macOS, or Linux using a small Go backend and a React dashboard.</p>
+            <h3>Node insights</h3>
+            <p>Inspect allocated capacity, used space, upload count, and utilization charts.</p>
           </article>
           <article>
             <span>04</span>
-            <h3>Secure Access Path</h3>
-            <p>Optional WireGuard setup gives the project a path toward private remote access.</p>
+            <h3>Secure path</h3>
+            <p>Optional WireGuard setup provides a foundation for private remote access.</p>
           </article>
         </div>
       </section>
 
-      <section class="section split" id="dashboard">
+      <section class="section dashboard-section" id="dashboard">
         <div>
           <p class="eyebrow">Dashboard</p>
-          <h2>Node visibility first, machine details second.</h2>
+          <h2>A visual admin surface when the CLI is not enough.</h2>
           <p>
-            The app opens to storage intelligence: total allocated storage, used and free differential,
-            storage roots, upload count, utilization charts, upload volume, and cumulative stored data.
-            Hardware details live on a separate Rig Stats view.
+            The React dashboard focuses first on node insights: total allocated storage,
+            used and free differential, roots, uploads, and utilization trends. Rig stats
+            like physical drives and platform details live on a separate page.
           </p>
         </div>
-        <div class="metrics-panel">
+        <div class="metric-stack">
           <div><small>Allocated</small><strong>500 GB</strong></div>
-          <div><small>Used</small><strong>32 GB</strong></div>
+          <div><small>Used / Free</small><strong>8% used</strong></div>
           <div><small>Roots</small><strong>3</strong></div>
           <div><small>Uploads</small><strong>126</strong></div>
-        </div>
-      </section>
-
-      <section class="section quickstart" id="quickstart">
-        <div class="section-heading">
-          <p class="eyebrow">Quickstart</p>
-          <h2>Build, allocate storage, start the node.</h2>
-        </div>
-        <div class="terminal">
-          <pre><code>git clone &lt;repository-url&gt;
-cd parachute
-go build ./cmd/parachute
-
-parachute setup
-parachute storage add /path/to/drive --limit 500GB
-parachute server start</code></pre>
         </div>
       </section>
     </main>
 
     <footer>
       <strong>ParaChute</strong>
-      <span>Personal cloud storage on your own hardware.</span>
+      <span>CLI-first personal cloud storage on your own hardware.</span>
     </footer>
   </body>
 </html>
