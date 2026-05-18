@@ -4,13 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"net"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
-
-	"golang.zx2c4.com/wireguard/wgctrl/wgtypes"
 )
 
 const (
@@ -22,7 +19,6 @@ const (
 
 type Config struct {
 	StorageRoots []StorageRoot `json:"storage_roots"`
-	VPN          *VPNConfig    `json:"vpn,omitempty"`
 }
 
 type StorageRoot struct {
@@ -31,23 +27,6 @@ type StorageRoot struct {
 	LimitBytes uint64    `json:"limit_bytes"`
 	Enabled    bool      `json:"enabled"`
 	CreatedAt  time.Time `json:"created_at"`
-}
-
-type VPNConfig struct {
-	InterfaceName    string             `json:"interface_name"`
-	ServerPrivateKey wgtypes.Key        `json:"server_private_key"`
-	ServerPublicKey  wgtypes.Key        `json:"server_public_key"`
-	ServerIP         string             `json:"server_ip"`
-	IPRange          string             `json:"ip_range"`
-	ListenPort       int                `json:"listen_port"`
-	ConfigPath       string             `json:"config_path"`
-	Peers            map[string]VPNPeer `json:"peers"`
-}
-
-type VPNPeer struct {
-	PublicKey  wgtypes.Key  `json:"public_key"`
-	AllowedIPs []net.IPNet  `json:"allowed_ips"`
-	Endpoint   *net.UDPAddr `json:"endpoint,omitempty"`
 }
 
 type RootManifestData struct {

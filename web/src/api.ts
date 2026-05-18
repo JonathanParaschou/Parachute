@@ -41,6 +41,25 @@ export type DashboardData = {
   metadata: StorageMetadata;
   roots: StorageRoot[];
   uploads: UploadRecord[];
+  remote: RemoteAccessStatus;
+};
+
+export type RemoteAccessStatus = {
+  local_url: string;
+  lan_urls: string[];
+  tailscale: RemoteOption;
+  recommended: string;
+  server_port: number;
+  machine_name: string;
+  remote_warnings: string[];
+};
+
+export type RemoteOption = {
+  available: boolean;
+  configured: boolean;
+  url?: string;
+  address?: string;
+  message?: string;
 };
 
 async function loadJSON<T>(url: string): Promise<T> {
@@ -52,16 +71,18 @@ async function loadJSON<T>(url: string): Promise<T> {
 }
 
 export async function loadDashboard(): Promise<DashboardData> {
-  const [metadata, roots, uploads] = await Promise.all([
+  const [metadata, roots, uploads, remote] = await Promise.all([
     loadJSON<StorageMetadata>("/storage-metadata"),
     loadJSON<StorageRoot[]>("/storage-roots"),
-    loadJSON<UploadRecord[]>("/uploads")
+    loadJSON<UploadRecord[]>("/uploads"),
+    loadJSON<RemoteAccessStatus>("/remote-access")
   ]);
 
   return {
     metadata,
     roots: roots ?? [],
-    uploads: uploads ?? []
+    uploads: uploads ?? [],
+    remote
   };
 }
 

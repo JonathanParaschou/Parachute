@@ -14,7 +14,7 @@ ParaChute is a lightweight, Go-powered cloud storage platform that turns any PC 
 - 🔐 Full data ownership and control
 - 🖥️ Runs on Windows, macOS, and Linux
 - 🌐 Access your files from anywhere
-- 🔒 Built-in WireGuard VPN for secure external access
+- 🌐 Tailscale-aware remote access status
 
 ---
 
@@ -22,9 +22,6 @@ ParaChute is a lightweight, Go-powered cloud storage platform that turns any PC 
 
 ### Prerequisites
 - Go 1.25 or later
-- Optional VPN support:
-  - Linux/macOS: WireGuard tools with `wg-quick` available on `PATH`
-  - Windows: WireGuard for Windows with `wireguard.exe` available, run as Administrator
 
 ### Building from source
 
@@ -58,14 +55,6 @@ Initialize a config:
 parachute setup
 ```
 
-Set up WireGuard for secure external access:
-
-```bash
-parachute setup --vpn
-```
-
-ParaChute writes a WireGuard server config under your user config directory and activates it with the native platform tool. Linux and macOS use `wg-quick`; Windows uses `wireguard.exe /installtunnelservice`.
-
 Allocate storage by pointing ParaChute at a directory or drive and choosing the maximum space it may use:
 
 ```bash
@@ -88,6 +77,14 @@ Start the local server:
 ```bash
 parachute server start
 ```
+
+Check local and private-network dashboard URLs:
+
+```bash
+parachute remote status
+```
+
+If Tailscale is installed and connected, ParaChute reports the Tailnet URL.
 
 ---
 

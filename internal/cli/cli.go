@@ -28,6 +28,8 @@ func Run(args []string, stdout, stderr io.Writer) int {
 		return runStorage(args[1:], stdout, stderr)
 	case "server":
 		return runServer(args[1:], stdout, stderr)
+	case "remote":
+		return runRemote(args[1:], stdout, stderr)
 	case "start":
 		return runServer([]string{"start"}, stdout, stderr)
 	case "status":
@@ -44,7 +46,6 @@ func runSetup(args []string, stdout, stderr io.Writer) int {
 	fs.SetOutput(stderr)
 	path := fs.String("path", "", "storage location to initialize")
 	limit := fs.String("limit", "100GB", "maximum space ParaChute may use")
-	vpn := fs.Bool("vpn", false, "setup WireGuard VPN for external access")
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
@@ -53,19 +54,6 @@ func runSetup(args []string, stdout, stderr io.Writer) int {
 	if err != nil {
 		fmt.Fprintf(stderr, "setup failed: %v\n", err)
 		return 1
-	}
-
-	// Setup VPN if requested
-	if *vpn {
-		if err := setupVPN(cfg, stdout, stderr); err != nil {
-			fmt.Fprintf(stderr, "VPN setup failed: %v\n", err)
-			return 1
-		}
-		if err := config.Save(cfg); err != nil {
-			fmt.Fprintf(stderr, "setup failed: %v\n", err)
-			return 1
-		}
-		fmt.Fprintln(stdout, "VPN configured for external access")
 	}
 
 	if *path == "" {
@@ -205,6 +193,55 @@ func runServer(args []string, stdout, stderr io.Writer) int {
 	return 0
 }
 
+func runRemote(args []string, stdout, stderr io.Writer) int {
+	if len(args) == 0 || args[0] != "status" {
+		fmt.Fprintln(stderr, "usage: parachute remote status")
+		return 2
+	}
+
+	remoteAccessService := services.NewRemoteAccessService()
+	status, err := remoteAccessService.Status()
+	if err != nil {
+		fmt.Fprintf(stderr, "remote status failed: %v\n", err)
+		return 1
+	}
+
+	fmt.Fprintf(stdout, "Dashboard port: %d\n", status.ServerPort)
+	fmt.Fprintf(stdout, "Local: %s\n", status.LocalURL)
+	if len(status.LANURLs) == 0 {
+		fmt.Fprintln(stdout, "LAN: no LAN IPv4 address detected")
+	} else {
+		fmt.Fprintln(stdout, "LAN:")
+		for _, url := range status.LANURLs {
+			fmt.Fprintf(stdout, "  %s\n", url)
+		}
+	}
+
+	printRemoteOption(stdout, "Tailscale", status.Tailscale)
+	fmt.Fprintf(stdout, "Recommended: %s\n", status.Recommended)
+
+	if len(status.RemoteWarnings) > 0 {
+		fmt.Fprintln(stdout, "Notes:")
+		for _, warning := range status.RemoteWarnings {
+			if warning != "" {
+				fmt.Fprintf(stdout, "  %s\n", warning)
+			}
+		}
+	}
+	return 0
+}
+
+func printRemoteOption(stdout io.Writer, name string, option services.RemoteOption) {
+	switch {
+	case option.URL != "":
+		fmt.Fprintf(stdout, "%s: %s\n", name, option.URL)
+	case option.Message != "":
+		fmt.Fprintf(stdout, "%s: %s\n", name, option.Message)
+	default:
+		fmt.Fprintf(stdout, "%s: unavailable\n", name)
+	}
+}
+
 func runStatus(stdout, stderr io.Writer) int {
 	cfg, err := config.Load()
 	if err != nil {
@@ -222,56 +259,19 @@ func runStatus(stdout, stderr io.Writer) int {
 		}
 	}
 	fmt.Fprintf(stdout, "Allocated capacity: %s\n", formatSize(total))
-	if cfg.VPN != nil {
-		fmt.Fprintf(stdout, "VPN: configured (%s)\n", cfg.VPN.InterfaceName)
-		fmt.Fprintf(stdout, "VPN config: %s\n", cfg.VPN.ConfigPath)
-	} else {
-		fmt.Fprintln(stdout, "VPN: not configured")
-	}
 	return 0
-}
-
-func setupVPN(cfg *config.Config, stdout, stderr io.Writer) error {
-	vpnService, err := services.NewVPNService()
-	if err != nil {
-		return fmt.Errorf("failed to initialize VPN service: %w", err)
-	}
-	defer vpnService.Close()
-
-	// Setup VPN with default configuration
-	vpnConfig, err := vpnService.SetupVPN("parachute0", "10.0.0.")
-	if err != nil {
-		return fmt.Errorf("failed to setup VPN: %w", err)
-	}
-
-	cfg.VPN = &config.VPNConfig{
-		InterfaceName:    vpnConfig.InterfaceName,
-		ServerPrivateKey: vpnConfig.ServerPrivateKey,
-		ServerPublicKey:  vpnConfig.ServerPublicKey,
-		ServerIP:         vpnConfig.ServerIP,
-		IPRange:          vpnConfig.IPRange,
-		ListenPort:       vpnConfig.ListenPort,
-		ConfigPath:       vpnConfig.ConfigPath,
-		Peers:            make(map[string]config.VPNPeer),
-	}
-
-	fmt.Fprintf(stdout, "VPN interface: %s\n", vpnConfig.InterfaceName)
-	fmt.Fprintf(stdout, "Server IP: %s\n", vpnConfig.ServerIP)
-	fmt.Fprintf(stdout, "Public key: %s\n", vpnConfig.ServerPublicKey.String())
-	fmt.Fprintf(stdout, "Config file: %s\n", vpnConfig.ConfigPath)
-
-	return nil
 }
 
 func printHelp(w io.Writer) {
 	fmt.Fprintln(w, "ParaChute turns this machine into a self-hosted cloud storage node.")
 	fmt.Fprintln(w)
 	fmt.Fprintln(w, "Usage:")
-	fmt.Fprintln(w, "  parachute setup [--path <path>] [--limit 100GB] [--vpn]")
+	fmt.Fprintln(w, "  parachute setup [--path <path>] [--limit 100GB]")
 	fmt.Fprintln(w, "  parachute storage add <path> --limit 500GB")
 	fmt.Fprintln(w, "  parachute storage list")
 	fmt.Fprintln(w, "  parachute storage remove <path>")
 	fmt.Fprintln(w, "  parachute server start")
+	fmt.Fprintln(w, "  parachute remote status")
 	fmt.Fprintln(w, "  parachute status")
 }
 

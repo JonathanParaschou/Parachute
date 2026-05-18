@@ -25,7 +25,7 @@ import {
   Tooltip
 } from "chart.js";
 import { Bar, Doughnut, Line } from "react-chartjs-2";
-import { DashboardData, Drive, StorageRoot, UploadRecord, loadDashboard, uploadFile } from "./api";
+import { DashboardData, Drive, RemoteAccessStatus, StorageRoot, UploadRecord, loadDashboard, uploadFile } from "./api";
 import { formatBytes, formatDate } from "./format";
 import parachuteLogo from "./assets/parachute-logo.svg";
 
@@ -378,8 +378,37 @@ function NodeInsights({ data, stats }: { data: DashboardData | null; stats: Node
             )}
           </div>
         </article>
+
+        <RemoteAccessPanel remote={data?.remote ?? null} />
       </section>
     </>
+  );
+}
+
+function RemoteAccessPanel({ remote }: { remote: RemoteAccessStatus | null }) {
+  return (
+    <article className="panel remote-panel">
+      <PanelTitle title="Remote Access" detail="Dashboard URLs detected for this node" />
+      <div className="remote-list">
+        <RemoteRow label="Local" value={remote?.local_url || "http://localhost:8080"} active />
+        {(remote?.lan_urls ?? []).map((url) => (
+          <RemoteRow label="LAN" value={url} active key={url} />
+        ))}
+        <RemoteRow label="Tailscale" value={remote?.tailscale.url || remote?.tailscale.message || "Not detected"} active={Boolean(remote?.tailscale.url)} />
+      </div>
+    </article>
+  );
+}
+
+function RemoteRow({ label, value, active }: { label: string; value: string; active: boolean }) {
+  return (
+    <div className="remote-row">
+      <span className={active ? "remote-dot active" : "remote-dot"}></span>
+      <div>
+        <strong>{label}</strong>
+        <small>{value}</small>
+      </div>
+    </div>
   );
 }
 

@@ -1,6 +1,10 @@
 package cli
 
-import "testing"
+import (
+	"bytes"
+	"strings"
+	"testing"
+)
 
 func TestParseSize(t *testing.T) {
 	tests := []struct {
@@ -37,5 +41,16 @@ func TestParseStorageAddArgsAcceptsLimitAfterPath(t *testing.T) {
 	}
 	if limit != "500GB" {
 		t.Fatalf("limit = %q, want 500GB", limit)
+	}
+}
+
+func TestRemoteStatusUsage(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	code := Run([]string{"remote"}, &stdout, &stderr)
+	if code != 2 {
+		t.Fatalf("Run returned %d, want 2", code)
+	}
+	if !strings.Contains(stderr.String(), "usage: parachute remote status") {
+		t.Fatalf("stderr = %q", stderr.String())
 	}
 }

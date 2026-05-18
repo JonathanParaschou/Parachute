@@ -49,6 +49,7 @@
           <pre><code>$ parachute setup
 $ parachute storage add E:\Storage --limit 500GB
 $ parachute server start
+$ parachute remote status
 
 Serving dashboard at http://localhost:8080
 Storage root ready: ParachuteStorage</code></pre>
@@ -77,6 +78,10 @@ Storage root ready: ParachuteStorage</code></pre>
             <code>parachute server start</code>
             <p>Run the API and local dashboard.</p>
           </article>
+          <article>
+            <code>parachute remote status</code>
+            <p>Show localhost, LAN, and Tailscale dashboard URLs.</p>
+          </article>
         </div>
       </section>
 
@@ -104,7 +109,7 @@ Storage root ready: ParachuteStorage</code></pre>
           <article>
             <span>04</span>
             <h3>Secure path</h3>
-            <p>Optional WireGuard setup provides a foundation for private remote access.</p>
+            <p>Tailscale-aware status reporting helps you find private remote access URLs.</p>
           </article>
         </div>
       </section>

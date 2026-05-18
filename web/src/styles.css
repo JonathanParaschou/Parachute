@@ -348,6 +348,50 @@ input[type="file"] {
   min-height: 336px;
 }
 
+.remote-panel {
+  min-height: auto;
+}
+
+.remote-list {
+  display: grid;
+  gap: 10px;
+}
+
+.remote-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 12px;
+  border: 1px solid #d7dde8;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.remote-row strong,
+.remote-row small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.remote-row small {
+  margin-top: 3px;
+  color: #667085;
+  line-height: 1.45;
+}
+
+.remote-dot {
+  width: 10px;
+  height: 10px;
+  margin-top: 5px;
+  border-radius: 50%;
+  background: #d0d5dd;
+}
+
+.remote-dot.active {
+  background: #0f766e;
+}
+
 .compact-chart {
   min-height: 336px;
 }
